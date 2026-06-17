@@ -26,6 +26,7 @@ export type UiMode = "study" | "freeplay" | "spectate";
 const DEFAULT_MAIN_DECK = "preset:main_deck_5hy_yotsuba_v1";
 const RUN_DIR_STORAGE_KEY = "weiss-human-play.run-dir";
 const AUTO_POLICY_ID = "main_league_selected";
+const DEFAULT_MODEL_SAMPLING_ALGORITHM = "pinned_cdf_pcg_v1";
 
 export function App() {
   const [health, setHealth] = useState<ApiHealth | null>(null);
@@ -162,7 +163,7 @@ export function App() {
         model_deck: modelDeck,
         mode: mode === "spectate" ? "study" : mode,
         spectate: mode === "spectate",
-        model_sampling_algorithm: "model_argmax_pinned_v1",
+        model_sampling_algorithm: DEFAULT_MODEL_SAMPLING_ALGORITHM,
         top_k: 5,
         search_rollout_opponent_policy_id: "B0 RandomLegal",
         god_search: searchEnabled

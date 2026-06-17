@@ -54,8 +54,9 @@ export const sampleSession: SessionState = {
         zones: {
           hand: [
             { id: "c1", name: "Yotsuba Nakano", card_no: "5HY/W90-001", level: 1, power: 4500 },
-            { id: "c2", name: "Choice Climax", card_no: "5HY/W90-CC" },
+            { id: "c2", name: "Choice Climax", card_no: "5HY/W90-CC", card_type: "climax", soul: 2 },
           ],
+          waiting_room: { cards: [{ id: "wr1", name: "Used Event", card_no: "5HY/W90-EV1" }], count: 1 },
         },
         stage: [{ seat: 0, lane: 2, row: "center", card: { id: "c3", name: "Front row Yotsuba" } }],
       },

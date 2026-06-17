@@ -29,6 +29,9 @@ export function formatMs(value: number | null | undefined): string {
   return `${(value / 1000).toFixed(1)} s`;
 }
 
+export const EFFECTIVE_STAT_NOTE =
+  "Current power/soul modifiers are not exposed by the public simulator view yet; shown values are printed unless marked current.";
+
 export function cardName(card: CardView | null | undefined): string {
   const resolved = card?.card ?? card;
   if (!resolved || resolved.hidden || resolved.redacted) {
@@ -117,6 +120,24 @@ export function cardPower(card: CardView | null | undefined): number | null {
 
 export function cardSoul(card: CardView | null | undefined): number | null {
   return toNumber(unwrapCard(card)?.soul);
+}
+
+export function cardCurrentPower(card: CardView | null | undefined): number | null {
+  const resolved = unwrapCard(card);
+  return toNumber(resolved?.current_power) ?? toNumber(resolved?.effective_power);
+}
+
+export function cardCurrentSoul(card: CardView | null | undefined): number | null {
+  const resolved = unwrapCard(card);
+  return toNumber(resolved?.current_soul) ?? toNumber(resolved?.effective_soul);
+}
+
+export function cardPowerModifier(card: CardView | null | undefined): number | null {
+  return toNumber(unwrapCard(card)?.power_modifier);
+}
+
+export function cardSoulModifier(card: CardView | null | undefined): number | null {
+  return toNumber(unwrapCard(card)?.soul_modifier);
 }
 
 export function cardTriggers(card: CardView | null | undefined): string[] {

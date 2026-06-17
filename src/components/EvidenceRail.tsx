@@ -54,7 +54,9 @@ export function EvidenceRail({ health, state, onClose }: EvidenceRailProps) {
               <ol className="playbyplay">
                 {[...state.history].reverse().map((entry) => (
                   <li key={entry.decision_index} className={cx("ply", entry.actor_kind === "model" && "ply--model")}>
-                    <span className="ply__who">{entry.actor_kind === "model" ? "Opp" : "You"}</span>
+                    <span className="ply__who">
+                      {entry.actor_kind === "model" ? "Opp" : "You"} <small>#{entry.decision_index}</small>
+                    </span>
                     <span className="ply__label">{entry.label}</span>
                     {entry.phase ? <span className="ply__phase">{entry.phase}</span> : null}
                   </li>

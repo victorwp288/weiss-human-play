@@ -2,13 +2,18 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { cardArtUrl, getCardInfo } from "../api";
 import {
+  EFFECTIVE_STAT_NOTE,
   cardColor,
   cardCost,
+  cardCurrentPower,
+  cardCurrentSoul,
   cardLevel,
   cardName,
   cardNumber,
   cardPower,
+  cardPowerModifier,
   cardSoul,
+  cardSoulModifier,
   cardTriggers,
   cardType,
   cx,
@@ -118,6 +123,10 @@ export function CardInspector({ target, humanTurn, spectate = false, phase }: Ca
   const cost = cardCost(target.card);
   const power = cardPower(target.card);
   const soul = cardSoul(target.card);
+  const currentPower = cardCurrentPower(target.card);
+  const currentSoul = cardCurrentSoul(target.card);
+  const powerModifier = cardPowerModifier(target.card);
+  const soulModifier = cardSoulModifier(target.card);
   const triggers = cardTriggers(target.card);
   const type = cardType(target.card);
   const color = cardColor(target.card);
@@ -154,9 +163,25 @@ export function CardInspector({ target, humanTurn, spectate = false, phase }: Ca
         {type ? <span className="istat">{type}</span> : null}
         {level != null ? <span className="istat">Lv {level}</span> : null}
         {cost != null ? <span className="istat">Cost {cost}</span> : null}
-        {power != null ? <span className="istat">{power} pow</span> : null}
-        {soul != null ? <span className="istat">{soul} soul</span> : null}
+        {power != null ? <span className="istat">printed {power} pow</span> : null}
+        {soul != null ? <span className="istat">printed {soul} soul</span> : null}
+        {currentPower != null ? <span className="istat istat--live">current {currentPower} pow</span> : null}
+        {currentSoul != null ? <span className="istat istat--live">current {currentSoul} soul</span> : null}
+        {powerModifier != null ? (
+          <span className="istat istat--live">
+            {powerModifier >= 0 ? "+" : ""}
+            {powerModifier} pow
+          </span>
+        ) : null}
+        {soulModifier != null ? (
+          <span className="istat istat--live">
+            {soulModifier >= 0 ? "+" : ""}
+            {soulModifier} soul
+          </span>
+        ) : null}
       </div>
+
+      {currentPower == null && currentSoul == null ? <p className="inspector__stat-note">{EFFECTIVE_STAT_NOTE}</p> : null}
 
       <div className="inspector__now">
         <h4>Right now</h4>

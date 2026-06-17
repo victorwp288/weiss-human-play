@@ -45,4 +45,26 @@ describe("Playfield", () => {
 
     expect(screen.getByTitle("Yotsuba Nakano — Toggle Yotsuba Nakano")).toHaveAttribute("aria-pressed", "true");
   });
+
+  it("shows public waiting room cards and a longer opponent action feed", () => {
+    const state = {
+      ...sampleSession,
+      human_turn: true,
+      history: Array.from({ length: 7 }, (_, index) => ({
+        decision_index: index,
+        actor_seat: 1,
+        actor_kind: "model" as const,
+        label: `Opponent move ${index}`,
+        phase: index < 3 ? "Main" : "Attack",
+      })),
+    };
+
+    render(<Playfield state={state} loading={false} />);
+
+    expect(screen.getByText("Used Event")).toBeInTheDocument();
+    expect(screen.queryByText("Opponent move 0")).not.toBeInTheDocument();
+    expect(screen.getByText("Opponent move 1")).toBeInTheDocument();
+    expect(screen.getByText("Opponent move 6")).toBeInTheDocument();
+    expect(screen.getAllByText("Attack").length).toBeGreaterThan(0);
+  });
 });

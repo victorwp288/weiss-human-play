@@ -93,6 +93,12 @@ export type CardView = {
   cost?: number | string;
   power?: number | string;
   soul?: number | string;
+  current_power?: number | string;
+  current_soul?: number | string;
+  effective_power?: number | string;
+  effective_soul?: number | string;
+  power_modifier?: number | string;
+  soul_modifier?: number | string;
   color?: CardColor;
   card_type?: string;
   triggers?: string[];

@@ -7,6 +7,7 @@ import {
   actionsForCard,
   actionsForStageSlot,
   cardName,
+  cardNumber,
   cx,
   stageCard,
   stageOccupied,
@@ -332,12 +333,18 @@ function HudFeed({
   }
   return (
     <div className="foe-feed" aria-label={label}>
-      {entries.map((entry) => (
-        <span key={entry.decision_index} className="foe-callout" title={entry.phase ? `during ${entry.phase}` : undefined}>
+      {entries.map((entry, index) => (
+        <span
+          key={entry.decision_index}
+          className="foe-callout"
+          style={{ ["--i" as string]: index } as CSSProperties}
+          title={entry.phase ? `during ${entry.phase}` : undefined}
+        >
           <span className={cx("stamp", "stamp--sm", tone === "ai" && "stamp--ai")} aria-hidden>
             打
           </span>
           <em>{entry.label}</em>
+          {entry.phase ? <small>{entry.phase}</small> : null}
         </span>
       ))}
     </div>
@@ -345,7 +352,7 @@ function HudFeed({
 }
 
 function lastEntriesForSeat(state: SessionState | null, seat: number): PublicHistoryEntry[] {
-  return (state?.history ?? []).filter((entry) => Number(entry.actor_seat) === Number(seat)).slice(-3);
+  return (state?.history ?? []).filter((entry) => Number(entry.actor_seat) === Number(seat)).slice(-6);
 }
 
 function modelActionsSinceLastHumanAct(state: SessionState | null): PublicHistoryEntry[] {
@@ -358,7 +365,7 @@ function modelActionsSinceLastHumanAct(state: SessionState | null): PublicHistor
         break;
       }
     }
-    return history.slice(lastHuman + 1).filter((entry) => entry.actor_kind === "model");
+    return history.slice(lastHuman + 1).filter((entry) => entry.actor_kind === "model").slice(-6);
   }
   // Older servers: fall back to the single most recent model action.
   const recent = state?.model?.recent_actions ?? [];
@@ -582,6 +589,11 @@ function BoardSide({
         <ZoneChip label="Waiting" icon={<Trash2 size={14} />} value={zoneCount(player, "waiting_room")} />
         <ZoneChip label="Climax" icon={<Sparkles size={14} />} value={zoneCount(player, "climax")} />
         <ZoneChip label="Memory" icon={<Boxes size={14} />} value={zoneCount(player, "memory")} />
+        <ZonePeek
+          label="Waiting room"
+          cards={zoneCards(player, "waiting_room")}
+          emptyText={side === "foe" ? "Opponent waiting room empty" : "Your waiting room empty"}
+        />
       </div>
     </div>
   );
@@ -595,6 +607,28 @@ function ZoneChip({ label, value, icon, tone }: { label: string; value: number; 
         <span className="zone-chip__label">{label}</span>
         <span className="zone-chip__n">{value}</span>
       </span>
+    </div>
+  );
+}
+
+function ZonePeek({ label, cards, emptyText }: { label: string; cards: CardView[]; emptyText: string }) {
+  const visible = cards.slice(-4).reverse();
+  return (
+    <div className="zone-peek" aria-label={label}>
+      {visible.length ? (
+        <>
+          <span className="zone-peek__label">{label}</span>
+          <div className="zone-peek__cards">
+            {visible.map((card, index) => (
+              <span key={`${cardNumber(card)}-${index}`} className="zone-peek__card" title={cardName(card)}>
+                {cardName(card)}
+              </span>
+            ))}
+          </div>
+        </>
+      ) : (
+        <span className="zone-peek__empty">{emptyText}</span>
+      )}
     </div>
   );
 }

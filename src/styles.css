@@ -670,7 +670,7 @@ button:disabled {
   font-size: 12px;
   font-weight: 700;
   color: var(--ai-deep);
-  animation: pose 280ms ease both;
+  animation: pose 280ms calc(var(--i, 0) * 42ms) ease both;
 }
 .foe-callout .stamp--sm {
   transform: rotate(-6deg);
@@ -934,6 +934,37 @@ button:disabled {
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
+.zone-peek {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 2px dotted var(--line);
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.24);
+}
+.zone-peek__label,
+.zone-peek__empty {
+  color: var(--ink-faint);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+.zone-peek__cards {
+  display: grid;
+  gap: 3px;
+}
+.zone-peek__card {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink);
+}
 
 /* battle line + turn medallion */
 .divider {
@@ -1161,6 +1192,9 @@ button:disabled {
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
+.card__pow.is-modified {
+  color: var(--shu-deep);
+}
 .size-sm .card__pow {
   font-size: 12px;
   text-shadow: 0 1px 2px var(--panel), 0 -1px 2px var(--panel);
@@ -1280,7 +1314,7 @@ button:disabled {
   font-family: var(--font-display);
   font-size: 9.5px;
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: 0;
   color: var(--kin);
 }
 
@@ -1863,11 +1897,17 @@ button:disabled {
   font-size: 12px;
 }
 .ply__who {
-  flex: 0 0 34px;
+  flex: 0 0 48px;
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 11px;
   color: var(--shu-deep);
+}
+.ply__who small {
+  color: var(--ink-faint);
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 800;
 }
 .ply--model .ply__who {
   color: var(--ai-deep);
@@ -1963,6 +2003,17 @@ button:disabled {
 .istat--blue {
   background: var(--c-blue);
   color: var(--paper);
+}
+.istat--live {
+  background: var(--kin);
+  color: var(--ink);
+}
+.inspector__stat-note {
+  margin: -4px 0 0;
+  color: var(--ink-faint);
+  font-size: 10.5px;
+  font-weight: 650;
+  line-height: 1.35;
 }
 .inspector__now {
   display: grid;

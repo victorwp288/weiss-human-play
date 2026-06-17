@@ -5,6 +5,8 @@ import { cardArtUrl } from "../api";
 import {
   cardColor,
   cardCost,
+  cardCurrentPower,
+  cardCurrentSoul,
   cardLevel,
   cardName,
   cardNumber,
@@ -66,6 +68,10 @@ export function CardFace({
   const cost = cardCost(card);
   const power = cardPower(card);
   const soul = cardSoul(card);
+  const currentPower = cardCurrentPower(card);
+  const currentSoul = cardCurrentSoul(card);
+  const shownPower = currentPower ?? power;
+  const shownSoul = currentSoul ?? soul;
   const triggers = cardTriggers(card);
   const name = cardName(card);
   const number = cardNumber(card);
@@ -120,13 +126,27 @@ export function CardFace({
 
       <div className="card__foot">
         {isClimax ? (
-          <span className="climax-tag">CLIMAX</span>
+          <>
+            <span className="climax-tag">CLIMAX</span>
+            {shownSoul != null ? (
+              <span className="card__soul" title={`${currentSoul == null ? "Printed" : "Current"} ${shownSoul} soul`}>
+                {Array.from({ length: Math.max(0, Math.min(4, shownSoul)) }, (_, i) => (
+                  <i key={i} />
+                ))}
+              </span>
+            ) : null}
+          </>
         ) : (
           <>
-            <span className="card__pow">{power ?? "—"}</span>
-            {soul != null ? (
-              <span className="card__soul" title={`${soul} soul`}>
-                {Array.from({ length: Math.max(0, Math.min(4, soul)) }, (_, i) => (
+            <span
+              className={cx("card__pow", currentPower != null && currentPower !== power && "is-modified")}
+              title={`${currentPower == null ? "Printed" : "Current"} power`}
+            >
+              {shownPower ?? "—"}
+            </span>
+            {shownSoul != null ? (
+              <span className="card__soul" title={`${currentSoul == null ? "Printed" : "Current"} ${shownSoul} soul`}>
+                {Array.from({ length: Math.max(0, Math.min(4, shownSoul)) }, (_, i) => (
                   <i key={i} />
                 ))}
               </span>
