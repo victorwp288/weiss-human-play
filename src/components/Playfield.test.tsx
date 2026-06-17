@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
 
 import { sampleSession } from "../test/fixtures";
 import { Playfield } from "./Playfield";
@@ -66,5 +67,28 @@ describe("Playfield", () => {
     expect(screen.getByText("Opponent move 1")).toBeInTheDocument();
     expect(screen.getByText("Opponent move 6")).toBeInTheDocument();
     expect(screen.getAllByText("Attack").length).toBeGreaterThan(0);
+  });
+
+  it("opens pinned card details when a staged card has no legal action", async () => {
+    const user = userEvent.setup();
+    const onInspect = vi.fn();
+
+    render(
+      <Playfield
+        state={{ ...sampleSession, view: { ...sampleSession.view, legal_actions: [{ action_id: 22, label: "Pass", family: "pass", is_pass: true }] } }}
+        loading={false}
+        onInspect={onInspect}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /Front row Yotsuba/ }));
+
+    expect(onInspect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        card: expect.objectContaining({ name: "Front row Yotsuba" }),
+        actions: [],
+        pinned: true,
+      }),
+    );
   });
 });

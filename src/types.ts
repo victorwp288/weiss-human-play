@@ -180,6 +180,7 @@ export type PublicHistoryEntry = {
   family?: string | null;
   phase?: string | null;
   elapsed_ms?: number | null;
+  details?: string[];
 };
 
 /** A card the user has "armed": the subset of legal actions it can perform. */

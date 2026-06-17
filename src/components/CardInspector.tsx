@@ -28,6 +28,7 @@ export type InspectTarget = {
   anchor: { top: number; bottom: number; left: number; right: number };
   /** Legal actions involving this card right now (already filtered by the caller). */
   actions: LegalAction[];
+  pinned?: boolean;
 };
 
 type CardInspectorProps = {
@@ -35,6 +36,7 @@ type CardInspectorProps = {
   humanTurn: boolean;
   spectate?: boolean;
   phase?: string | null;
+  onClose?: () => void;
 };
 
 /** Reference meaning of trigger icons (standard Weiss Schwarz rules). */
@@ -57,7 +59,7 @@ const TRIGGER_INFO: Record<string, string> = {
 
 const PANEL_WIDTH = 282;
 
-export function CardInspector({ target, humanTurn, spectate = false, phase }: CardInspectorProps) {
+export function CardInspector({ target, humanTurn, spectate = false, phase, onClose = () => {} }: CardInspectorProps) {
   const [visible, setVisible] = useState(false);
   const [info, setInfo] = useState<CardInfo | null>(null);
   const [top, setTop] = useState<number | null>(null);
@@ -143,13 +145,20 @@ export function CardInspector({ target, humanTurn, spectate = false, phase }: Ca
   return (
     <aside
       ref={panelRef}
-      className="inspector"
+      className={cx("inspector", target.pinned && "is-pinned")}
       style={{ left, top: top ?? 8, width: PANEL_WIDTH, visibility: top == null ? "hidden" : undefined }}
       aria-hidden
     >
       <header className="inspector__head">
-        <b>{cardName(target.card)}</b>
-        <span>{number}</span>
+        <span>
+          <b>{cardName(target.card)}</b>
+          {target.pinned ? (
+            <button type="button" className="inspector__close" onClick={onClose} aria-label="Close card details">
+              x
+            </button>
+          ) : null}
+        </span>
+        <small>{number}</small>
       </header>
 
       {number.includes("/") ? (

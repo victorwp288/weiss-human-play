@@ -648,21 +648,20 @@ button:disabled {
 .foe-feed {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   flex: 1 1 160px;
   min-width: 0;
-  overflow-x: auto;
+  overflow: visible;
   padding: 2px;
-  scrollbar-width: thin;
 }
 .foe-callout {
-  flex: 0 0 auto;
-}
-.foe-callout {
+  flex: 1 1 158px;
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  max-width: 100%;
+  min-width: 0;
+  max-width: 260px;
   padding: 5px 12px 5px 6px;
   border: var(--bw) solid var(--ink);
   border-radius: 999px;
@@ -679,8 +678,10 @@ button:disabled {
   font-style: normal;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 240px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+  min-width: 0;
 }
 .foe-callout small {
   color: var(--ink-faint);
@@ -957,13 +958,25 @@ button:disabled {
   gap: 3px;
 }
 .zone-peek__card {
+  display: block;
+  width: 100%;
   min-width: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 10px;
   font-weight: 700;
   color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-ui);
+}
+.zone-peek__card:hover {
+  color: var(--shu-deep);
+  text-decoration: underline;
 }
 
 /* battle line + turn medallion */
@@ -1889,12 +1902,17 @@ button:disabled {
   overflow-y: auto;
 }
 .ply {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
+  display: grid;
+  gap: 5px;
   padding: 5px 0;
   border-bottom: 2px dotted var(--line);
   font-size: 12px;
+}
+.ply__main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
 }
 .ply__who {
   flex: 0 0 48px;
@@ -1926,6 +1944,21 @@ button:disabled {
   letter-spacing: 0.6px;
   text-transform: uppercase;
 }
+.ply__details {
+  display: grid;
+  gap: 3px;
+  margin: 0 0 0 56px;
+  padding: 0;
+  list-style: none;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.25;
+}
+.ply__details li::before {
+  content: "-> ";
+  color: var(--shu);
+  font-weight: 900;
+}
 
 /* ─────────────────────────────────────────────── card inspector */
 
@@ -1944,9 +1977,18 @@ button:disabled {
   pointer-events: none;
   animation: pose 140ms ease both;
 }
+.inspector.is-pinned {
+  pointer-events: auto;
+}
 .inspector__head {
   display: grid;
   gap: 1px;
+}
+.inspector__head > span {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
 }
 .inspector__head b {
   font-family: var(--font-display);
@@ -1954,10 +1996,23 @@ button:disabled {
   font-weight: 800;
   line-height: 1.2;
 }
-.inspector__head span {
+.inspector__head small {
   color: var(--ink-faint);
   font-size: 10px;
   font-weight: 700;
+}
+.inspector__close {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: var(--bw) solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
 }
 .inspector__art {
   border: var(--bw) solid var(--ink);

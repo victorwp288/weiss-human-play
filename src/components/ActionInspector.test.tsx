@@ -106,4 +106,44 @@ describe("ActionInspector", () => {
 
     expect(screen.getByRole("button", { name: "Toggle Yotsuba Nakano" })).toHaveAttribute("aria-pressed", "true");
   });
+
+  it("adds copy hints to duplicate action labels", () => {
+    render(
+      <ActionInspector
+        state={{
+          ...sampleSession,
+          view: {
+            ...sampleSession.view,
+            legal_actions: [
+              {
+                action_id: 31,
+                label: "Clock Honor Student? Yotsuba Nakano",
+                family: "clock_phase",
+                params: { hand_index: 0 },
+              },
+              {
+                action_id: 32,
+                label: "Clock Honor Student? Yotsuba Nakano",
+                family: "clock_phase",
+                params: { hand_index: 2 },
+              },
+            ],
+          },
+        }}
+        selectedActionId={null}
+        busy={false}
+        onSelectAction={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Clock Honor Student? Yotsuba Nakano · hand 1" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Clock Honor Student? Yotsuba Nakano · hand 3" })).toBeEnabled();
+  });
+
+  it("does not show stale model rankings while the human is choosing", () => {
+    render(<ActionInspector state={sampleSession} selectedActionId={null} busy={false} onSelectAction={vi.fn()} />);
+
+    expect(screen.getByText(/Hidden while you choose/i)).toBeInTheDocument();
+    expect(screen.queryByText("Attack front")).not.toBeInTheDocument();
+  });
 });

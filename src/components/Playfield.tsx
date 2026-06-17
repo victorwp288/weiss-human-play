@@ -94,6 +94,16 @@ export function Playfield({
     return (anchor: { top: number; bottom: number; left: number; right: number } | null) =>
       onInspect(anchor ? { card, anchor, actions } : null);
   };
+  const pinInspectFor = (
+    card: CardView | null | undefined,
+    actions: LegalAction[],
+    anchor: { top: number; bottom: number; left: number; right: number },
+  ) => {
+    if (!card || !unwrapCard(card)?.name) {
+      return;
+    }
+    onInspect({ card, anchor, actions, pinned: true });
+  };
 
   const turnState = !state ? "setup" : state.terminal ? "over" : state.human_turn ? "you" : "foe";
   const turnLabel =
@@ -186,6 +196,7 @@ export function Playfield({
           onFocusChange={onFocusChange}
           onSelectAction={onSelectAction}
           inspectFor={inspectFor}
+          pinInspectFor={pinInspectFor}
         />
 
         <div className="divider">
@@ -228,6 +239,7 @@ export function Playfield({
           onFocusChange={onFocusChange}
           onSelectAction={onSelectAction}
           inspectFor={inspectFor}
+          pinInspectFor={pinInspectFor}
           onNudgeCard={(card) => onNudge(noActionReason(card))}
         />
 
@@ -287,7 +299,10 @@ export function Playfield({
                     matches.length
                       ? () => playHandCard(card, index)
                       : state && !state.terminal
-                        ? () => onNudge(noActionReason(card))
+                        ? (anchor) => {
+                            pinInspectFor(card, [], anchor);
+                            onNudge(noActionReason(card));
+                          }
                         : undefined
                   }
                   draggable={matches.length > 0}
@@ -452,6 +467,7 @@ function BoardSide({
   onFocusChange = () => {},
   onSelectAction,
   inspectFor,
+  pinInspectFor,
   onNudgeCard,
 }: {
   player?: PlayerView;
@@ -470,6 +486,11 @@ function BoardSide({
     card: CardView | null | undefined,
     actions: LegalAction[],
   ) => ((anchor: { top: number; bottom: number; left: number; right: number } | null) => void) | undefined;
+  pinInspectFor?: (
+    card: CardView | null | undefined,
+    actions: LegalAction[],
+    anchor: { top: number; bottom: number; left: number; right: number },
+  ) => void;
   onNudgeCard?: (card: CardView | null) => void;
 }) {
   const { center, back } = stageRows(stageSlotsForSeat(normalizeStageSlots(view, player), seat));
@@ -554,7 +575,12 @@ function BoardSide({
               matches.length
                 ? () => clickStageCard(slot, matches)
                 : interactive && onNudgeCard
-                  ? () => onNudgeCard(card)
+                  ? (anchor) => {
+                      pinInspectFor?.(card, [], anchor);
+                      onNudgeCard(card);
+                    }
+                  : pinInspectFor
+                    ? (anchor) => pinInspectFor(card, [], anchor)
                   : undefined
             }
             onHover={inspectFor?.(card, matches)}
@@ -593,6 +619,7 @@ function BoardSide({
           label="Waiting room"
           cards={zoneCards(player, "waiting_room")}
           emptyText={side === "foe" ? "Opponent waiting room empty" : "Your waiting room empty"}
+          onInspect={(card, anchor) => pinInspectFor?.(card, [], anchor)}
         />
       </div>
     </div>
@@ -611,7 +638,17 @@ function ZoneChip({ label, value, icon, tone }: { label: string; value: number; 
   );
 }
 
-function ZonePeek({ label, cards, emptyText }: { label: string; cards: CardView[]; emptyText: string }) {
+function ZonePeek({
+  label,
+  cards,
+  emptyText,
+  onInspect,
+}: {
+  label: string;
+  cards: CardView[];
+  emptyText: string;
+  onInspect?: (card: CardView, anchor: { top: number; bottom: number; left: number; right: number }) => void;
+}) {
   const visible = cards.slice(-4).reverse();
   return (
     <div className="zone-peek" aria-label={label}>
@@ -620,9 +657,18 @@ function ZonePeek({ label, cards, emptyText }: { label: string; cards: CardView[
           <span className="zone-peek__label">{label}</span>
           <div className="zone-peek__cards">
             {visible.map((card, index) => (
-              <span key={`${cardNumber(card)}-${index}`} className="zone-peek__card" title={cardName(card)}>
+              <button
+                key={`${cardNumber(card)}-${index}`}
+                type="button"
+                className="zone-peek__card"
+                title={`Inspect ${cardName(card)}`}
+                onClick={(event) => {
+                  const r = event.currentTarget.getBoundingClientRect();
+                  onInspect?.(card, { top: r.top, bottom: r.bottom, left: r.left, right: r.right });
+                }}
+              >
                 {cardName(card)}
-              </span>
+              </button>
             ))}
           </div>
         </>

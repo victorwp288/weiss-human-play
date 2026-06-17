@@ -258,6 +258,23 @@ export function friendlyActionLabel(action: LegalAction): string {
   return replaced !== label ? replaced : label;
 }
 
+export function disambiguatedActionLabel(action: LegalAction, peers: LegalAction[]): string {
+  const label = friendlyActionLabel(action);
+  const duplicateCount = peers.filter((peer) => friendlyActionLabel(peer) === label).length;
+  if (duplicateCount <= 1) {
+    return label;
+  }
+  const handIndex = action.params?.hand_index;
+  if (typeof handIndex === "number") {
+    return `${label} · hand ${handIndex + 1}`;
+  }
+  const sourceIndex = action.source_refs?.find((ref) => typeof ref.index === "number")?.index;
+  if (typeof sourceIndex === "number") {
+    return `${label} · copy ${sourceIndex + 1}`;
+  }
+  return `${label} · action ${action.action_id}`;
+}
+
 export function zoneCards(player: PlayerView | undefined, zoneName: string): CardView[] {
   const zone = player?.zones?.[zoneName];
   if (Array.isArray(zone)) {

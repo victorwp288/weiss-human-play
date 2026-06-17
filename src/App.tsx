@@ -63,6 +63,10 @@ export function App() {
     setNotice({ id: Date.now(), text, tone });
   }, []);
 
+  const inspectCard = useCallback((target: InspectTarget | null) => {
+    setInspect((current) => (target === null && current?.pinned ? current : target));
+  }, []);
+
   useEffect(() => {
     if (!notice) {
       return;
@@ -367,7 +371,7 @@ export function App() {
           focus={focus}
           onFocusChange={setFocus}
           onSelectAction={chooseAction}
-          onInspect={setInspect}
+          onInspect={inspectCard}
           onNudge={nudge}
         />
       </section>
@@ -387,6 +391,7 @@ export function App() {
         humanTurn={Boolean(state.human_turn)}
         spectate={Boolean(state.spectate)}
         phase={state.view.summary?.phase ?? null}
+        onClose={() => setInspect(null)}
       />
 
       {notice ? (

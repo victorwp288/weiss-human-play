@@ -28,7 +28,7 @@ type CardFaceProps = {
   draggable?: boolean;
   onDragStart?: DragEventHandler<HTMLButtonElement>;
   onDragEnd?: DragEventHandler<HTMLButtonElement>;
-  onClick?: () => void;
+  onClick?: (anchor: { top: number; bottom: number; left: number; right: number }) => void;
   /** Hover inspection: called with the card's viewport rect on enter, null on leave. */
   onHover?: (anchor: { top: number; bottom: number; left: number; right: number } | null) => void;
   title?: string;
@@ -177,7 +177,10 @@ export function CardFace({
         type="button"
         className={className}
         style={style}
-        onClick={onClick}
+        onClick={(event) => {
+          const r = event.currentTarget.getBoundingClientRect();
+          onClick?.({ top: r.top, bottom: r.bottom, left: r.left, right: r.right });
+        }}
         draggable={draggable}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}

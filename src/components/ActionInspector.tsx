@@ -2,7 +2,7 @@ import { ArrowRight, ChevronRight, MoveRight, Play, Shuffle, SkipForward, Sparkl
 import type { ReactNode } from "react";
 import { Fragment } from "react";
 
-import { cx, formatProbability, friendlyActionLabel, unwrapCard } from "../format";
+import { cx, disambiguatedActionLabel, formatProbability, unwrapCard } from "../format";
 import type { ActionFocus, CardRef, LegalAction, RankedModelAction, SessionState } from "../types";
 import { CardFace } from "./Card";
 
@@ -54,6 +54,7 @@ export function ActionInspector({
     [...recent].reverse().find((entry) => entry.ranked_actions.length > 1) ?? recent[recent.length - 1];
   const ranked = rankedSource?.ranked_actions ?? [];
   const phase = state?.view.summary?.phase;
+  const showRanked = Boolean(state && !state.human_turn) || Boolean(state?.spectate);
 
   const pool = focus ? focus.actions : legalActions;
   const sorted = [...pool].sort((a, b) => FAMILY_ORDER.indexOf(familyOf(a)) - FAMILY_ORDER.indexOf(familyOf(b)));
@@ -102,7 +103,7 @@ export function ActionInspector({
             const selected = selectedActionId === action.action_id || markedActionIds.has(action.action_id);
             const card = refCard(action);
             const newGroup = showGroups && (index === 0 || familyOf(sorted[index - 1]) !== fam);
-            const label = friendlyActionLabel(action);
+            const label = disambiguatedActionLabel(action, sorted);
             return (
               <Fragment key={`${action.action_id}-${action.index ?? "x"}`}>
                 {newGroup ? <span className="group-label">{FAMILY_TITLE[fam] ?? fam}</span> : null}
@@ -141,9 +142,17 @@ export function ActionInspector({
       <div className="pref">
         <div className="pref__head">
           <Swords size={15} aria-hidden />
-          <span>Last model preference</span>
+          <span>{showRanked ? "Live model preference" : "Model preference"}</span>
         </div>
-        {ranked.length ? <Ranked ranked={ranked} /> : <p className="muted">Appears after the model acts.</p>}
+        {showRanked && ranked.length ? (
+          <Ranked ranked={ranked} />
+        ) : (
+          <p className="muted">
+            {state?.human_turn
+              ? "Hidden while you choose; the log keeps previous model reads."
+              : "Appears while the model is choosing."}
+          </p>
+        )}
       </div>
     </aside>
   );
