@@ -27,6 +27,15 @@ const DEFAULT_MAIN_DECK = "preset:main_deck_5hy_yotsuba_v1";
 const RUN_DIR_STORAGE_KEY = "weiss-human-play.run-dir";
 const AUTO_POLICY_ID = "main_league_selected";
 const DEFAULT_MODEL_SAMPLING_ALGORITHM = "pinned_cdf_pcg_v1";
+const DEFAULT_SPECTATE_OPPONENT_POLICY_ID = "B3 HeuristicPublicAggro";
+
+const POLICY_DECK_BY_ID: Record<string, string> = {
+  "B0 RandomLegal": DEFAULT_MAIN_DECK,
+  "B1 NoLeague baseline": DEFAULT_MAIN_DECK,
+  "B2 HeuristicPublic": DEFAULT_MAIN_DECK,
+  "B3 HeuristicPublicAggro": "preset:aggro_deck_5hy_nino_v1",
+  "B4 HeuristicPublicControl": "preset:control_deck_jj_s66_v1",
+};
 
 export function App() {
   const [health, setHealth] = useState<ApiHealth | null>(null);
@@ -35,6 +44,8 @@ export function App() {
   const [policies, setPolicies] = useState<PolicySummary[]>([]);
   const [runDir, setRunDir] = useState(() => localStorage.getItem(RUN_DIR_STORAGE_KEY) ?? "");
   const [policyId, setPolicyId] = useState(AUTO_POLICY_ID);
+  const [spectateOpponentPolicyId, setSpectateOpponentPolicyId] = useState(DEFAULT_SPECTATE_OPPONENT_POLICY_ID);
+  const [modelSamplingAlgorithm, setModelSamplingAlgorithm] = useState(DEFAULT_MODEL_SAMPLING_ALGORITHM);
   const [humanDeck, setHumanDeck] = useState(DEFAULT_MAIN_DECK);
   const [modelDeck, setModelDeck] = useState(DEFAULT_MAIN_DECK);
   const [humanSeat, setHumanSeat] = useState(0);
@@ -146,6 +157,14 @@ export function App() {
   }, [state?.session_id]);
 
   useEffect(() => {
+    if (mode !== "spectate") {
+      return;
+    }
+    setModelDeck(deckForPolicyId(policyId));
+    setHumanDeck(deckForPolicyId(spectateOpponentPolicyId));
+  }, [mode, policyId, spectateOpponentPolicyId]);
+
+  useEffect(() => {
     const phase = state?.view.summary?.phase?.toLowerCase();
     if (!state || state.terminal || phase !== "mulligan") {
       setMarkedMulliganActionIds(new Set());
@@ -161,13 +180,14 @@ export function App() {
       const next = await createSession({
         run_dir: runDir,
         policy_id: policyId,
+        spectate_opponent_policy_id: mode === "spectate" ? spectateOpponentPolicyId : undefined,
         human_seat: humanSeat,
         seed,
         human_deck: humanDeck,
         model_deck: modelDeck,
         mode: mode === "spectate" ? "study" : mode,
         spectate: mode === "spectate",
-        model_sampling_algorithm: DEFAULT_MODEL_SAMPLING_ALGORITHM,
+        model_sampling_algorithm: modelSamplingAlgorithm,
         top_k: 5,
         search_rollout_opponent_policy_id: "B0 RandomLegal",
         god_search: searchEnabled
@@ -285,6 +305,8 @@ export function App() {
           policies={setupPolicies}
           runDir={runDir}
           policyId={policyId}
+          spectateOpponentPolicyId={spectateOpponentPolicyId}
+          modelSamplingAlgorithm={modelSamplingAlgorithm}
           humanDeck={humanDeck}
           modelDeck={modelDeck}
           humanSeat={humanSeat}
@@ -295,6 +317,8 @@ export function App() {
           error={error}
           onRunDirChange={setRunDir}
           onPolicyIdChange={setPolicyId}
+          onSpectateOpponentPolicyIdChange={setSpectateOpponentPolicyId}
+          onModelSamplingAlgorithmChange={setModelSamplingAlgorithm}
           onHumanDeckChange={setHumanDeck}
           onModelDeckChange={setModelDeck}
           onHumanSeatChange={setHumanSeat}
@@ -417,6 +441,10 @@ function reconcilePolicyId(current: string, policies: PolicySummary[]): string {
     policies.find((policy) => policy.policy_id !== AUTO_POLICY_ID)?.policy_id ??
     AUTO_POLICY_ID
   );
+}
+
+function deckForPolicyId(policyId: string): string {
+  return POLICY_DECK_BY_ID[policyId] ?? DEFAULT_MAIN_DECK;
 }
 
 function isMulliganSelect(action: LegalAction): boolean {

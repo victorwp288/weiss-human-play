@@ -50,16 +50,40 @@ describe("App", () => {
         config_loadable: true,
       },
     ]);
-    mockedGetPolicies.mockResolvedValue([]);
+    mockedGetPolicies.mockResolvedValue([
+      {
+        policy_id: "B3 HeuristicPublicAggro",
+        label: "B3 HeuristicPublicAggro",
+        kind: "heuristic",
+        selected_by_default: false,
+      },
+    ]);
     mockedCreateSession.mockResolvedValue(sampleSession);
   });
 
   it("starts public matches with the stochastic eval sampler", async () => {
     render(<App />);
 
+    await screen.findByDisplayValue("/runs/main");
     await userEvent.click(await screen.findByRole("button", { name: /start match/i }));
 
     await waitFor(() => expect(mockedCreateSession).toHaveBeenCalled());
     expect(mockedCreateSession.mock.calls[0][0].model_sampling_algorithm).toBe("pinned_cdf_pcg_v1");
+  });
+
+  it("can start spectate matches against a selected baseline with deterministic argmax", async () => {
+    render(<App />);
+
+    await screen.findByDisplayValue("/runs/main");
+    await userEvent.click(await screen.findByRole("button", { name: "Spectate" }));
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Sampler" }), "model_argmax_pinned_v1");
+    await userEvent.click(screen.getByRole("button", { name: /start match/i }));
+
+    await waitFor(() => expect(mockedCreateSession).toHaveBeenCalled());
+    expect(mockedCreateSession.mock.calls[0][0]).toMatchObject({
+      spectate: true,
+      spectate_opponent_policy_id: "B3 HeuristicPublicAggro",
+      model_sampling_algorithm: "model_argmax_pinned_v1",
+    });
   });
 });

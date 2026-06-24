@@ -70,7 +70,7 @@ export function ActionInspector({
               ? state.terminal
                 ? "Match complete."
                 : state.spectate
-                  ? "Spectating — the model plays both seats."
+                  ? "Spectating — bots play both seats."
                   : state.human_turn
                     ? "Choose one simulator-legal action."
                     : "Waiting for the model."

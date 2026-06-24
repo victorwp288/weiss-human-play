@@ -176,6 +176,7 @@ export type PublicHistoryEntry = {
   decision_index: number;
   actor_seat: number;
   actor_kind: "human" | "model" | string;
+  policy_id?: string | null;
   label: string;
   family?: string | null;
   phase?: string | null;
@@ -205,6 +206,7 @@ export type RecentModelAction = {
   actor_seat: number;
   action_id: number;
   action_label: string;
+  policy_id?: string | null;
   elapsed_ms?: number | null;
   ranked_actions: RankedModelAction[];
 };
@@ -215,6 +217,9 @@ export type SessionState = {
   human_seat: number;
   model_seat: number;
   policy_id: string;
+  spectate_opponent_policy_id?: string | null;
+  seat0_policy_id?: string | null;
+  seat1_policy_id?: string | null;
   human_turn: boolean;
   spectate?: boolean;
   terminal: boolean;
@@ -244,6 +249,7 @@ export type GodSearchDiagnostics = {
 export type CreateSessionPayload = {
   run_dir: string;
   policy_id: string;
+  spectate_opponent_policy_id?: string;
   human_seat: number;
   seed: number;
   human_deck: string;

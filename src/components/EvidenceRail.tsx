@@ -36,7 +36,10 @@ export function EvidenceRail({ health, state, onClose }: EvidenceRailProps) {
             <h3>State</h3>
             <Kv label="Decision" value={String(terminalDecisionCount ?? state?.view.summary?.decision_count ?? state?.view.decision_id ?? "—")} />
             <Kv label="Phase" value={state?.view.summary?.phase ?? "—"} />
-            <Kv label="Policy" value={state?.policy_id ? compactId(state.policy_id, 12) : "—"} />
+            <Kv label={state?.spectate ? "Primary bot" : "Policy"} value={state?.policy_id ? compactId(state.policy_id, 12) : "—"} />
+            {state?.spectate ? (
+              <Kv label="Opponent bot" value={compactId(state.spectate_opponent_policy_id, 12) || "—"} />
+            ) : null}
             <Kv label="Legal fingerprint" value={compactId(state?.view.legal_fingerprint64, 8) || "—"} />
             <Kv label="View hash" value={compactId(state?.view.view_hash64, 8) || "—"} />
             <Kv label="Search" value={counters ? `${counters.search_decisions ?? 0} probes` : "disabled"} />
@@ -56,7 +59,8 @@ export function EvidenceRail({ health, state, onClose }: EvidenceRailProps) {
                   <li key={entry.decision_index} className={cx("ply", entry.actor_kind === "model" && "ply--model")}>
                     <div className="ply__main">
                       <span className="ply__who">
-                        {entry.actor_kind === "model" ? "Opp" : "You"} <small>#{entry.decision_index}</small>
+                        {state?.spectate ? `Seat ${entry.actor_seat}` : entry.actor_kind === "model" ? "Opp" : "You"}{" "}
+                        <small>#{entry.decision_index}</small>
                       </span>
                       <span className="ply__label">{entry.label}</span>
                       {entry.phase ? <span className="ply__phase">{entry.phase}</span> : null}

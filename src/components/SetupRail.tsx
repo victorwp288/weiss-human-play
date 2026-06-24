@@ -9,6 +9,8 @@ type SetupRailProps = {
   policies: PolicySummary[];
   runDir: string;
   policyId: string;
+  spectateOpponentPolicyId: string;
+  modelSamplingAlgorithm: string;
   humanDeck: string;
   modelDeck: string;
   humanSeat: number;
@@ -19,6 +21,8 @@ type SetupRailProps = {
   error: string | null;
   onRunDirChange: (value: string) => void;
   onPolicyIdChange: (value: string) => void;
+  onSpectateOpponentPolicyIdChange: (value: string) => void;
+  onModelSamplingAlgorithmChange: (value: string) => void;
   onHumanDeckChange: (value: string) => void;
   onModelDeckChange: (value: string) => void;
   onHumanSeatChange: (value: number) => void;
@@ -37,6 +41,8 @@ export function SetupRail(props: SetupRailProps) {
     policies,
     runDir,
     policyId,
+    spectateOpponentPolicyId,
+    modelSamplingAlgorithm,
     humanDeck,
     modelDeck,
     humanSeat,
@@ -47,6 +53,8 @@ export function SetupRail(props: SetupRailProps) {
     error,
     onRunDirChange,
     onPolicyIdChange,
+    onSpectateOpponentPolicyIdChange,
+    onModelSamplingAlgorithmChange,
     onHumanDeckChange,
     onModelDeckChange,
     onHumanSeatChange,
@@ -59,6 +67,7 @@ export function SetupRail(props: SetupRailProps) {
 
   const apiReady = Boolean(health?.ok);
   const displayPolicies = policies.filter((policy) => policy.policy_id !== "main_league_selected");
+  const baselinePolicies = displayPolicies.filter((policy) => isBaselinePolicy(policy));
 
   return (
     <form
@@ -122,7 +131,7 @@ export function SetupRail(props: SetupRailProps) {
           <input value={runDir} onChange={(event) => onRunDirChange(event.target.value)} placeholder="C:\\path\\to\\run" />
         </label>
         <label className="field">
-          <span>Policy</span>
+          <span>{mode === "spectate" ? "Primary bot" : "Policy"}</span>
           <select value={policyId} onChange={(event) => onPolicyIdChange(event.target.value)}>
             <option value="main_league_selected">Auto-select strongest main model</option>
             {displayPolicies.map((policy) => (
@@ -130,6 +139,26 @@ export function SetupRail(props: SetupRailProps) {
                 {policy.label}
               </option>
             ))}
+          </select>
+        </label>
+        {mode === "spectate" ? (
+          <label className="field">
+            <span>Opponent bot</span>
+            <select value={spectateOpponentPolicyId} onChange={(event) => onSpectateOpponentPolicyIdChange(event.target.value)}>
+              <option value="same_as_policy">Self-play / same policy</option>
+              {baselinePolicies.map((policy) => (
+                <option key={policy.policy_id} value={policy.policy_id}>
+                  {policy.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        <label className="field">
+          <span>Sampler</span>
+          <select value={modelSamplingAlgorithm} onChange={(event) => onModelSamplingAlgorithmChange(event.target.value)}>
+            <option value="pinned_cdf_pcg_v1">Pinned CDF stochastic</option>
+            <option value="model_argmax_pinned_v1">Deterministic argmax</option>
           </select>
         </label>
       </section>
@@ -147,8 +176,18 @@ export function SetupRail(props: SetupRailProps) {
             </button>
           </div>
         </label>
-        <DeckSelect label="Your deck" decks={decks} value={humanDeck} onChange={onHumanDeckChange} />
-        <DeckSelect label="Opponent deck" decks={decks} value={modelDeck} onChange={onModelDeckChange} />
+        <DeckSelect
+          label={mode === "spectate" ? "Opponent bot deck" : "Your deck"}
+          decks={decks}
+          value={humanDeck}
+          onChange={onHumanDeckChange}
+        />
+        <DeckSelect
+          label={mode === "spectate" ? "Primary bot deck" : "Opponent deck"}
+          decks={decks}
+          value={modelDeck}
+          onChange={onModelDeckChange}
+        />
       </section>
 
       <section className="setup__section">
@@ -171,7 +210,7 @@ export function SetupRail(props: SetupRailProps) {
                 type="button"
                 className={mode === "spectate" ? "is-on" : ""}
                 onClick={() => onModeChange("spectate")}
-                title="The model plays both seats; you watch."
+                title="Two bots play; you watch."
               >
                 Spectate
               </button>
@@ -203,6 +242,13 @@ export function SetupRail(props: SetupRailProps) {
       </button>
     </form>
   );
+}
+
+function isBaselinePolicy(policy: PolicySummary): boolean {
+  if (policy.kind === "baseline" || policy.kind === "heuristic") {
+    return true;
+  }
+  return /^B\d\b/.test(policy.policy_id);
 }
 
 function DeckSelect({
