@@ -17,6 +17,7 @@ import { CardInspector } from "./components/CardInspector";
 import type { InspectTarget } from "./components/CardInspector";
 import { EvidenceRail } from "./components/EvidenceRail";
 import { Playfield } from "./components/Playfield";
+import { PostgameBanner } from "./components/PostgameBanner";
 import { SetupRail } from "./components/SetupRail";
 import { cx } from "./format";
 import type { ActionFocus, ApiHealth, DeckSummary, LegalAction, PolicySummary, RunSummary, SessionState } from "./types";
@@ -386,6 +387,8 @@ export function App() {
             </button>
           </div>
         </header>
+
+        <PostgameBanner state={state} />
 
         <Playfield
           state={state}

@@ -21,7 +21,7 @@ import type { CardView } from "../types";
 
 type CardFaceProps = {
   card: CardView | null | undefined;
-  size?: "xs" | "sm" | "md";
+  size?: "xs" | "sm" | "stage" | "md";
   selected?: boolean;
   actionable?: boolean;
   rested?: boolean;

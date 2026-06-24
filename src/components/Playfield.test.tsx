@@ -7,7 +7,7 @@ import { Playfield } from "./Playfield";
 
 describe("Playfield", () => {
   it("shows the stage, hand cards, and a turn indicator for the human", () => {
-    render(<Playfield state={sampleSession} loading={false} />);
+    const { container } = render(<Playfield state={sampleSession} loading={false} />);
 
     expect(screen.getByText("Your turn")).toBeInTheDocument();
     expect(screen.getByText("Front row Yotsuba")).toBeInTheDocument();
@@ -15,6 +15,7 @@ describe("Playfield", () => {
     expect(screen.getByText("Yotsuba Nakano")).toBeInTheDocument();
     expect(screen.getByText("Choice Climax")).toBeInTheDocument();
     expect(screen.getByText(/Opponent hidden zones remain redacted/i)).toBeInTheDocument();
+    expect(container.querySelectorAll(".slot .card.size-stage").length).toBeGreaterThan(0);
   });
 
   it("shows a finished indicator for terminal states", () => {
@@ -62,7 +63,8 @@ describe("Playfield", () => {
 
     render(<Playfield state={state} loading={false} />);
 
-    expect(screen.getByText("Used Event")).toBeInTheDocument();
+    expect(screen.getAllByText("Used Event").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Inspect Used Event" }).querySelector(".card.size-xs")).toBeTruthy();
     expect(screen.queryByText("Opponent move 0")).not.toBeInTheDocument();
     expect(screen.getByText("Opponent move 1")).toBeInTheDocument();
     expect(screen.getByText("Opponent move 6")).toBeInTheDocument();

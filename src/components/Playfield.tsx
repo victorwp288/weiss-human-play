@@ -180,7 +180,12 @@ export function Playfield({
 
   return (
     <div className="playfield">
-      <PlayerHud player={model} side="foe" seat={state?.model_seat ?? 1}>
+      <PlayerHud
+        player={model}
+        side="foe"
+        seat={state?.model_seat ?? 1}
+        label={spectate ? "Primary bot" : "Opponent"}
+      >
         <HudFeed entries={feedTop} terminal={Boolean(state?.terminal)} tone="ai" label="Opponent's last actions" />
       </PlayerHud>
 
@@ -261,7 +266,12 @@ export function Playfield({
         ) : null}
       </div>
 
-      <PlayerHud player={human} side="you" seat={state?.human_seat ?? 0}>
+      <PlayerHud
+        player={human}
+        side="you"
+        seat={state?.human_seat ?? 0}
+        label={spectate ? "Opponent bot" : "You"}
+      >
         {spectate ? (
           <HudFeed entries={feedBottom} terminal={Boolean(state?.terminal)} tone="shu" label="Seat's last actions" />
         ) : null}
@@ -403,11 +413,13 @@ function PlayerHud({
   player,
   side,
   seat,
+  label,
   children,
 }: {
   player?: PlayerView;
   side: "foe" | "you";
   seat: number;
+  label?: string;
   children?: ReactNode;
 }) {
   const level = zoneCount(player, "level");
@@ -419,7 +431,7 @@ function PlayerHud({
           {side === "foe" ? "相手" : "自分"}
         </span>
         <div className="name-block">
-          <span className="name">{side === "foe" ? "Opponent" : "You"}</span>
+          <span className="name">{label ?? (side === "foe" ? "Opponent" : "You")}</span>
           <span className="seat">Seat {seat}</span>
         </div>
       </div>
@@ -567,7 +579,7 @@ function BoardSide({
         ) : occupied ? (
           <CardFace
             card={card}
-            size="sm"
+            size="stage"
             rested={slot.rested || slot.has_attacked}
             actionable={matches.length > 0}
             selected={focused || marked || (matches.length === 1 && matches[0].action_id === selectedActionId)}
@@ -661,13 +673,15 @@ function ZonePeek({
                 key={`${cardNumber(card)}-${index}`}
                 type="button"
                 className="zone-peek__card"
+                aria-label={`Inspect ${cardName(card)}`}
                 title={`Inspect ${cardName(card)}`}
                 onClick={(event) => {
                   const r = event.currentTarget.getBoundingClientRect();
                   onInspect?.(card, { top: r.top, bottom: r.bottom, left: r.left, right: r.right });
                 }}
               >
-                {cardName(card)}
+                <CardFace card={card} size="xs" />
+                <span>{cardName(card)}</span>
               </button>
             ))}
           </div>
